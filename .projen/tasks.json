@@ -1,0 +1,544 @@
+{
+  "manifestVersion": 3,
+  "env": {
+    "PATH": "$(pnpm -c exec \"node --print process.env.PATH\")"
+  },
+  "tasks": {
+    "build": {
+      "name": "build",
+      "description": "Full release build",
+      "steps": [
+        {
+          "spawn": "default"
+        },
+        {
+          "spawn": "pre-compile"
+        },
+        {
+          "spawn": "compile"
+        },
+        {
+          "spawn": "post-compile"
+        },
+        {
+          "spawn": "test"
+        },
+        {
+          "spawn": "package"
+        }
+      ]
+    },
+    "build:tag": {
+      "name": "build:tag",
+      "steps": [
+        {
+          "name": "set environment",
+          "exec": "set -- $@;\n                arg1=$1;\n                if test $# -eq 1; then\n                  if test $(git tag -l | grep $1); then\n                    currentBranch=$(git branch --show-current);\n                    echo \"current branch: $currentBranch\";\n                    echo \"building at tag: $1\";\n                    export PROJEN_BUILD_TAG=$1;\n                    export PROJEN_RESTORE_BRANCH=$currentBranch;\n                    pnpm build:tag:env;\n                  else\n                    echo \"tag not found: $1\";\n                    exit 1;\n                  fi;\n                else\n                  echo \"usage: build:tag <tag>\";\n                  exit 1;\n                fi",
+          "receiveArgs": true
+        }
+      ],
+      "condition": "node -e \"if (process.env.CI) process.exit(1)\""
+    },
+    "build:tag:env": {
+      "name": "build:tag:env",
+      "requiredEnv": [
+        "PROJEN_BUILD_TAG",
+        "PROJEN_RESTORE_BRANCH"
+      ],
+      "steps": [
+        {
+          "exec": "echo \"Building at ${PROJEN_BUILD_TAG}\"",
+          "receiveArgs": true
+        },
+        {
+          "spawn": "stash:push",
+          "receiveArgs": false
+        },
+        {
+          "spawn": "git:checkout",
+          "receiveArgs": false
+        },
+        {
+          "spawn": "default",
+          "receiveArgs": false
+        },
+        {
+          "spawn": "setpkg:version",
+          "receiveArgs": false
+        },
+        {
+          "spawn": "pre-compile",
+          "receiveArgs": false
+        },
+        {
+          "spawn": "compile",
+          "receiveArgs": false
+        },
+        {
+          "spawn": "post-compile",
+          "receiveArgs": false
+        },
+        {
+          "spawn": "test",
+          "receiveArgs": false
+        },
+        {
+          "spawn": "package",
+          "receiveArgs": false
+        },
+        {
+          "spawn": "restore:branch",
+          "receiveArgs": false
+        },
+        {
+          "spawn": "stash:pop",
+          "receiveArgs": false
+        }
+      ],
+      "condition": "node -e \"if (process.env.CI) process.exit(1)\""
+    },
+    "bump": {
+      "name": "bump",
+      "description": "Bumps version based on latest git tag and generates a changelog entry",
+      "env": {
+        "OUTFILE": "package.json",
+        "CHANGELOG": "dist/changelog.md",
+        "BUMPFILE": "dist/version.txt",
+        "RELEASETAG": "dist/releasetag.txt",
+        "RELEASE_TAG_PREFIX": "",
+        "BUMP_PACKAGE": "commit-and-tag-version@^12"
+      },
+      "steps": [
+        {
+          "builtin": "release/resolve-latest-tag",
+          "outputEnv": "LATEST_TAG"
+        },
+        {
+          "spawn": "bump:releasable-commits",
+          "outputEnv": "RELEASABLE_COMMITS",
+          "condition": "git rev-parse --verify --quiet \"refs/tags/$LATEST_TAG\""
+        },
+        {
+          "builtin": "release/suggest-version-bump",
+          "outputEnv": "SUGGESTED_BUMP"
+        },
+        {
+          "builtin": "release/apply-version-bump"
+        }
+      ],
+      "condition": "git log --oneline -1 | grep -v \"chore(release):\" > /dev/null"
+    },
+    "bump:releasable-commits": {
+      "name": "bump:releasable-commits",
+      "description": "Print the releasable commits since the latest release",
+      "steps": [
+        {
+          "exec": "git log --oneline $LATEST_TAG..HEAD"
+        }
+      ]
+    },
+    "clobber": {
+      "name": "clobber",
+      "description": "hard resets to HEAD of origin and cleans the local repo",
+      "env": {
+        "BRANCH": "$(git branch --show-current)"
+      },
+      "steps": [
+        {
+          "execArgs": [
+            "git",
+            "checkout",
+            "-b",
+            "scratch"
+          ],
+          "name": "save current HEAD in \"scratch\" branch"
+        },
+        {
+          "exec": "git checkout \"$BRANCH\""
+        },
+        {
+          "execArgs": [
+            "git",
+            "fetch",
+            "origin"
+          ],
+          "name": "fetch latest changes from origin"
+        },
+        {
+          "exec": "git reset --hard \"origin/$BRANCH\"",
+          "name": "hard reset to origin commit"
+        },
+        {
+          "execArgs": [
+            "git",
+            "clean",
+            "-fdx"
+          ],
+          "name": "clean all untracked files"
+        },
+        {
+          "say": "ready to rock! (unpushed commits are under the \"scratch\" branch)"
+        }
+      ],
+      "condition": "git diff --exit-code > /dev/null"
+    },
+    "compile": {
+      "name": "compile",
+      "description": "Only compile",
+      "steps": [
+        {
+          "execArgs": [
+            "tsc",
+            "--build"
+          ]
+        }
+      ]
+    },
+    "compile:examples": {
+      "name": "compile:examples",
+      "description": "compile examples",
+      "steps": [
+        {
+          "execArgs": [
+            "tsc",
+            "--project",
+            "examples/tsconfig.json"
+          ]
+        }
+      ]
+    },
+    "default": {
+      "name": "default",
+      "description": "Synthesize project files",
+      "steps": [
+        {
+          "exec": "tsx --tsconfig projenrc/tsconfig.json .projenrc.ts"
+        }
+      ]
+    },
+    "eject": {
+      "name": "eject",
+      "description": "Remove projen from the project",
+      "env": {
+        "PROJEN_EJECTING": "true"
+      },
+      "steps": [
+        {
+          "spawn": "default"
+        }
+      ]
+    },
+    "eslint": {
+      "name": "eslint",
+      "description": "custom eslint task to run against code base",
+      "env": {
+        "NODE_NO_WARNINGS": "1"
+      },
+      "steps": [
+        {
+          "exec": "eslint --ext .ts,.tsx --fix --no-error-on-unmatched-pattern $@ src test build-tools projenrc .projenrc.ts eslint.config.ts",
+          "receiveArgs": true
+        }
+      ]
+    },
+    "git:checkout": {
+      "name": "git:checkout",
+      "requiredEnv": [
+        "PROJEN_BUILD_TAG"
+      ],
+      "steps": [
+        {
+          "exec": "git checkout ${PROJEN_BUILD_TAG}",
+          "receiveArgs": false
+        }
+      ]
+    },
+    "install": {
+      "name": "install",
+      "description": "Install project dependencies and update lockfile (non-frozen)",
+      "steps": [
+        {
+          "exec": "pnpm i --no-frozen-lockfile"
+        }
+      ]
+    },
+    "install:ci": {
+      "name": "install:ci",
+      "description": "Install project dependencies using frozen lockfile",
+      "steps": [
+        {
+          "exec": "pnpm i --frozen-lockfile"
+        }
+      ]
+    },
+    "package": {
+      "name": "package",
+      "description": "Creates the distribution package",
+      "steps": [
+        {
+          "execArgs": [
+            "mkdir",
+            "-p",
+            "dist/js"
+          ]
+        },
+        {
+          "execArgs": [
+            "pnpm",
+            "pack",
+            "--pack-destination",
+            "dist/js"
+          ]
+        }
+      ]
+    },
+    "post-compile": {
+      "name": "post-compile",
+      "description": "Runs after successful compilation",
+      "steps": [
+        {
+          "name": "Generate Typedoc documentation",
+          "exec": "pnpm build:docs"
+        }
+      ]
+    },
+    "post-upgrade": {
+      "name": "post-upgrade",
+      "description": "Runs after upgrading dependencies"
+    },
+    "pre-compile": {
+      "name": "pre-compile",
+      "description": "Prepare the project for compilation"
+    },
+    "publish:git": {
+      "name": "publish:git",
+      "description": "Prepends the release changelog onto the project changelog, creates a release commit, and tags the release",
+      "env": {
+        "CHANGELOG": "dist/changelog.md",
+        "RELEASE_TAG_FILE": "dist/releasetag.txt",
+        "PROJECT_CHANGELOG_FILE": "CHANGELOG.md",
+        "VERSION_FILE": "dist/version.txt"
+      },
+      "steps": [
+        {
+          "builtin": "release/update-changelog"
+        },
+        {
+          "builtin": "release/tag-version"
+        }
+      ],
+      "condition": "git log --oneline -1 | grep -v \"chore(release):\" > /dev/null && sh -c \"test \\\"$(git branch --show-current)\\\" = \\\"main\\\"\""
+    },
+    "publish:local": {
+      "name": "publish:local",
+      "steps": [
+        {
+          "name": "copy package to ~/.tjh-packages folder (dryrun: false)",
+          "exec": "cp dist/js/ncfour-us-stats-$(cat dist/version.txt).tgz ~/.tjh-packages/."
+        }
+      ],
+      "condition": "sh -c \"test -f \\\"dist/version.txt\\\" && test \\\"$(git branch --show-current)\\\" = \\\"main\\\"\""
+    },
+    "release": {
+      "name": "release",
+      "description": "Prepare a release from \"main\" branch",
+      "env": {
+        "RELEASE": "true"
+      },
+      "steps": [
+        {
+          "execArgs": [
+            "rm",
+            "-fr",
+            "dist"
+          ]
+        },
+        {
+          "spawn": "bump"
+        },
+        {
+          "spawn": "build"
+        },
+        {
+          "spawn": "unbump"
+        },
+        {
+          "exec": "git diff --ignore-space-at-eol --exit-code"
+        },
+        {
+          "spawn": "publish:git"
+        },
+        {
+          "spawn": "publish:local"
+        }
+      ]
+    },
+    "restore:branch": {
+      "name": "restore:branch",
+      "requiredEnv": [
+        "PROJEN_RESTORE_BRANCH"
+      ],
+      "steps": [
+        {
+          "exec": "git status --short;\n                git restore .;\n                echo \"restoring to branch: ${PROJEN_RESTORE_BRANCH}\";\n                git checkout ${PROJEN_RESTORE_BRANCH}",
+          "receiveArgs": false
+        }
+      ]
+    },
+    "setpkg:version": {
+      "name": "setpkg:version",
+      "steps": [
+        {
+          "exec": "pnpm version --no-git-tag-version from-git --allow-same-version",
+          "receiveArgs": false
+        }
+      ]
+    },
+    "stash:pop": {
+      "name": "stash:pop",
+      "steps": [
+        {
+          "exec": "if test $(git stash list | grep \"save:work\" | wc -l) -eq 1; then git stash pop; fi",
+          "receiveArgs": false
+        }
+      ]
+    },
+    "stash:push": {
+      "name": "stash:push",
+      "steps": [
+        {
+          "exec": "if test $(git status --short | wc -l) -ne 0; then git stash push -m \"save:work\"; fi",
+          "receiveArgs": false
+        }
+      ]
+    },
+    "test": {
+      "name": "test",
+      "description": "Run tests",
+      "env": {
+        "NODE_OPTIONS": "--experimental-vm-modules"
+      },
+      "steps": [
+        {
+          "execArgs": [
+            "jest",
+            "--passWithNoTests",
+            "--updateSnapshot"
+          ],
+          "receiveArgs": true
+        },
+        {
+          "spawn": "eslint"
+        }
+      ]
+    },
+    "test:watch": {
+      "name": "test:watch",
+      "description": "Run jest in watch mode",
+      "steps": [
+        {
+          "execArgs": [
+            "jest",
+            "--watch"
+          ]
+        }
+      ]
+    },
+    "unbump": {
+      "name": "unbump",
+      "description": "Restores version to 0.0.0",
+      "env": {
+        "OUTFILE": "package.json",
+        "CHANGELOG": "dist/changelog.md",
+        "BUMPFILE": "dist/version.txt",
+        "RELEASETAG": "dist/releasetag.txt",
+        "RELEASE_TAG_PREFIX": "",
+        "BUMP_PACKAGE": "commit-and-tag-version@^12"
+      },
+      "steps": [
+        {
+          "builtin": "release/reset-version"
+        }
+      ]
+    },
+    "upgrade": {
+      "name": "upgrade",
+      "description": "upgrade dependencies",
+      "env": {
+        "CI": "0"
+      },
+      "steps": [
+        {
+          "execArgs": [
+            "pnpm",
+            "dlx",
+            "npm-check-updates@20",
+            "--upgrade",
+            "--target=minor",
+            "--peer",
+            "--no-deprecated",
+            "--dep=dev,prod,peer,optional",
+            "--filter=@eslint/compat,@eslint/eslintrc,@eslint/js,@jest/globals,@ncfour-us/projen-utils,@stylistic/eslint-plugin,@types/jest,@typescript-eslint/eslint-plugin,@typescript-eslint/parser,eslint,eslint-import-resolver-typescript,eslint-plugin-import,globals,jest,jiti,prettier,projen,ts-jest,ts-node,tsx,typedoc,typedoc-plugin-markdown,typescript,@ncfour-us/logging"
+          ]
+        },
+        {
+          "exec": "pnpm i --no-frozen-lockfile"
+        },
+        {
+          "execArgs": [
+            "pnpm",
+            "update",
+            "@eslint/compat",
+            "@eslint/eslintrc",
+            "@eslint/js",
+            "@jest/globals",
+            "@ncfour-us/projen-utils",
+            "@stylistic/eslint-plugin",
+            "@types/jest",
+            "@types/node",
+            "@typescript-eslint/eslint-plugin",
+            "@typescript-eslint/parser",
+            "commit-and-tag-version",
+            "constructs",
+            "eslint",
+            "eslint-import-resolver-typescript",
+            "eslint-plugin-import",
+            "globals",
+            "jest",
+            "jest-junit",
+            "jiti",
+            "prettier",
+            "projen",
+            "ts-jest",
+            "ts-node",
+            "tsx",
+            "typedoc",
+            "typedoc-plugin-markdown",
+            "typescript",
+            "@ncfour-us/logging"
+          ]
+        },
+        {
+          "exec": "pnpm exec projen"
+        },
+        {
+          "spawn": "post-upgrade"
+        }
+      ]
+    },
+    "watch": {
+      "name": "watch",
+      "description": "Watch & compile in the background",
+      "steps": [
+        {
+          "execArgs": [
+            "tsc",
+            "--build",
+            "-w"
+          ]
+        }
+      ]
+    }
+  },
+  "//": "~~ Generated by projen. To modify, edit .projenrc.ts and run \"pnpm exec projen\"."
+}
