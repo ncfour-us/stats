@@ -47,7 +47,7 @@ export default defineConfig([globalIgnores([
     sourceType: 'module',
 
     parserOptions: {
-      project: './tsconfig.dev.json',
+      project: './test/tsconfig.json',
     },
   },
 
@@ -60,7 +60,7 @@ export default defineConfig([globalIgnores([
       node: {},
 
       typescript: {
-        project: './tsconfig.dev.json',
+        project: './test/tsconfig.json',
         alwaysTryTypes: true,
       },
     },

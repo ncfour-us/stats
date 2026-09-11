@@ -60,7 +60,7 @@
     "tsx": "^4.23.13",
     "typedoc": "^0.28.20",
     "typedoc-plugin-markdown": "^4.13.0",
-    "typescript": "^7.0.2"
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "@ncfour-us/logging": "^0.1.0"
