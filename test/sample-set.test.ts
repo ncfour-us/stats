@@ -5,7 +5,7 @@ import { Logger } from '@ncfour-us/logging';
 import { SampleBucket, SampleSet } from '@ncfour-us/stats';
 
 const logger = Logger.createLogger('simple', {
-  level: 'trace',
+  level: 'error',
   json: false,
   color: true,
 });
@@ -83,99 +83,143 @@ describe('SampleSet tests', () => {
 
   test('median of small string set works', () => {
     // Given - Arrange
-
-    // When - Act
     const newSampleSet = new SampleSet({
       initialValues: ['blue', 'red', 'red', 'green', 'yellow', 'blue'],
       logger: logger,
     });
 
+    // When - Act
+    const median = newSampleSet.getMedian();
+
     // Then - Assert
-    expect(newSampleSet).toBeDefined();
-    expect(newSampleSet.getMedian()).toBe('green');
+    expect(median).toBe('green');
   });
 
   test('mode of small string set works', () => {
     // Given - Arrange
-
-    // When - Act
     const newSampleSet = new SampleSet({
       initialValues: ['blue', 'red', 'red', 'green', 'yellow', 'blue'],
       logger: logger,
     });
 
+    // When - Act
+    const mode = newSampleSet.getMode();
+
     // Then - Assert
-    expect(newSampleSet).toBeDefined();
-    expect(newSampleSet.getMode()).toBe('blue');
+    expect(mode).toBe('blue');
   });
 
   test('median of slightly different string set works', () => {
     // Given - Arrange
-
-    // When - Act
     const newSampleSet = new SampleSet({
       initialValues: ['blue', 'red', 'red', 'green', 'yellow', 'blue', 'red'],
       logger: logger,
     });
 
+    // When - Act
+    const median = newSampleSet.getMedian();
+
     // Then - Assert
-    expect(newSampleSet).toBeDefined();
-    expect(newSampleSet.getMedian()).toBe('red');
+    expect(median).toBe('red');
   });
 
   test('mode of slightly different string set works', () => {
     // Given - Arrange
-
-    // When - Act
     const newSampleSet = new SampleSet({
       initialValues: ['blue', 'red', 'red', 'green', 'yellow', 'blue', 'red'],
       logger: logger,
     });
 
+    // When - Act
+    const mode = newSampleSet.getMode();
+
     // Then - Assert
-    expect(newSampleSet).toBeDefined();
-    expect(newSampleSet.getMode()).toBe('red');
+    expect(mode).toBe('red');
   });
 
   test('mean of small string set works', () => {
     // Given - Arrange
-
-    // When - Act
     const newSampleSet = new SampleSet({
       initialValues: ['blue', 'red', 'red', 'green', 'yellow', 'blue'],
       logger: logger,
     });
 
+    // When - Act
+    const mean = newSampleSet.getMean();
+
     // Then - Assert
-    expect(newSampleSet).toBeDefined();
-    expect(newSampleSet.getMean()).toBe('red');
+    expect(mean).toBe('red');
   });
 
   test('median of small numeric set works', () => {
     // Given - Arrange
-
-    // When - Act
     const newSampleSet = new SampleSet({
       initialValues: [0, 2.3, -3.4, -1, 6, 12],
       logger: logger,
     });
 
+    // When - Act
+    const median = newSampleSet.getMedian();
+
     // Then - Assert
-    expect(newSampleSet).toBeDefined();
-    expect(newSampleSet.getMedian()).toBe(0);
+    expect(median).toBe(0);
   });
 
   test('mean of small numeric set works', () => {
     // Given - Arrange
-
-    // When - Act
     const newSampleSet = new SampleSet({
       initialValues: [0, 2.3, -3.4, -1, 6, 12],
       logger: logger,
     });
 
+    // When - Act
+    const mean = newSampleSet.getMean();
+
     // Then - Assert
-    expect(newSampleSet).toBeDefined();
-    expect(newSampleSet.getMean()).toBeCloseTo(2.65);
+    expect(mean).toBeCloseTo(2.65);
+  });
+
+  test('mode of small numeric set works', () => {
+    // Given - Arrange
+    const newSampleSet = new SampleSet({
+      initialValues: [0, 2.3, -3.4, -1, 6, 12],
+      logger: logger,
+    });
+
+    // When - Act
+    const mode = newSampleSet.getMode();
+
+    // Then - Assert
+    expect(mode).toBeCloseTo(-0.833333);
+  });
+
+  test('add of string to small numeric set is IGNORED', () => {
+    // Given - Arrange
+    const newSampleSet = new SampleSet({
+      initialValues: [0, 2.3, -3.4, -1, 6, 12],
+      logger: logger,
+    });
+
+    // When - Act
+    newSampleSet.addValue('green');
+    const numSamples = newSampleSet.getNumSamples();
+
+    // Then - Assert
+    expect(numSamples).toBe(6);
+  });
+
+  test('add of number to small string set is IGNORED', () => {
+    // Given - Arrange
+    const newSampleSet = new SampleSet({
+      initialValues: ['blue', 'red', 'red', 'green', 'yellow', 'blue'],
+      logger: logger,
+    });
+
+    // When - Act
+    newSampleSet.addValue(13);
+    const numSamples = newSampleSet.getNumSamples();
+
+    // Then - Assert
+    expect(numSamples).toBe(6);
   });
 });

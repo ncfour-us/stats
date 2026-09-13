@@ -1,32 +1,40 @@
-[@ncfour-us/stats](../index.md) / SampleSet
+[@ncfour-us/stats](../index.md) / UniformSampleSet
 
-# Class: SampleSet
+# Class: UniformSampleSet
 
-## Extended by
+## Extends
 
-- [`UniformSampleSet`](UniformSampleSet.md)
+- [`SampleSet`](SampleSet.md)
 
 ## Constructors
 
 ### Constructor
 
-> **new SampleSet**(`options`): `SampleSet`
+> **new UniformSampleSet**(`options`): `UniformSampleSet`
 
 #### Parameters
 
 ##### options
 
-[`SampleSetOptions`](../interfaces/SampleSetOptions.md)
+[`UniformSampleSetOptions`](../interfaces/UniformSampleSetOptions.md)
 
 #### Returns
 
-`SampleSet`
+`UniformSampleSet`
+
+#### Overrides
+
+[`SampleSet`](SampleSet.md).[`constructor`](SampleSet.md#constructor)
 
 ## Properties
 
 ### logger?
 
 > `protected` `optional` **logger?**: `ILogger`
+
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`logger`](SampleSet.md#logger)
 
 ## Methods
 
@@ -44,6 +52,10 @@
 
 `void`
 
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`addValue`](SampleSet.md#addvalue)
+
 ***
 
 ### addValues()
@@ -60,6 +72,10 @@
 
 `void`
 
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`addValues`](SampleSet.md#addvalues)
+
 ***
 
 ### getMax()
@@ -69,6 +85,10 @@
 #### Returns
 
 [`SampleSetValue`](../type-aliases/SampleSetValue.md)
+
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getMax`](SampleSet.md#getmax)
 
 ***
 
@@ -80,6 +100,10 @@
 
 [`SampleSetValue`](../type-aliases/SampleSetValue.md)
 
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getMean`](SampleSet.md#getmean)
+
 ***
 
 ### getMedian()
@@ -89,6 +113,10 @@
 #### Returns
 
 [`SampleSetValue`](../type-aliases/SampleSetValue.md)
+
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getMedian`](SampleSet.md#getmedian)
 
 ***
 
@@ -100,6 +128,10 @@
 
 [`SampleSetValue`](../type-aliases/SampleSetValue.md)
 
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getMin`](SampleSet.md#getmin)
+
 ***
 
 ### getMode()
@@ -109,6 +141,10 @@
 #### Returns
 
 [`SampleSetValue`](../type-aliases/SampleSetValue.md)
+
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getMode`](SampleSet.md#getmode)
 
 ***
 
@@ -120,6 +156,10 @@
 
 `number`
 
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getNumSamples`](SampleSet.md#getnumsamples)
+
 ***
 
 ### getStddev()
@@ -129,6 +169,10 @@
 #### Returns
 
 `number`
+
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getStddev`](SampleSet.md#getstddev)
 
 ***
 
@@ -146,6 +190,10 @@
 
 [`SampleSetValue`](../type-aliases/SampleSetValue.md) \| `undefined`
 
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getValue`](SampleSet.md#getvalue)
+
 ***
 
 ### getValues()
@@ -155,6 +203,10 @@
 #### Returns
 
 [`SampleSetValue`](../type-aliases/SampleSetValue.md)[]
+
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getValues`](SampleSet.md#getvalues)
 
 ***
 
@@ -166,6 +218,10 @@
 
 [`SampleSetValue`](../type-aliases/SampleSetValue.md)
 
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getVariance`](SampleSet.md#getvariance)
+
 ***
 
 ### isNumeric()
@@ -175,6 +231,10 @@
 #### Returns
 
 `boolean`
+
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`isNumeric`](SampleSet.md#isnumeric)
 
 ***
 
@@ -191,3 +251,7 @@
 #### Returns
 
 `void`
+
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`setValues`](SampleSet.md#setvalues)

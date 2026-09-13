@@ -25,7 +25,7 @@ export interface SampleSetOptions {
 
 export class SampleSet {
   // dependencies
-  private logger?: ILogger;
+  protected logger?: ILogger;
 
   // sample data
   private valuesNumeric: boolean;
@@ -115,6 +115,14 @@ export class SampleSet {
   }
 
   public addValues(values: SampleSetValue[] ) {
+    if ( this.values.length > 0 &&
+        ( typeof values[0] === 'string' && this.valuesNumeric ) ||
+        ( typeof values[0] === 'number' && !this.valuesNumeric ) ) {
+      // type mismatch on values being added - quietly IGNORE
+      this.logger?.error(`SampleSet.addValues: type mismatch on values added, valuesNumeric: ${this.valuesNumeric}, values type: ${typeof values[0]}`);
+      return;
+    }
+
     if (values.length > 0 && typeof values[0] === 'string') {
       this.valuesNumeric = false;
 
@@ -129,18 +137,29 @@ export class SampleSet {
           this.values.push(this.dictionary.length-1);
         }
       });
+
+      this.logger?.trace(`SampleSet.addValues: resulting dictionary: ${this.dictionary}`);
     } else {
       // number values
       this.valuesNumeric = true;
       this.values = (values as number[]).map((value) => value) as number[];
     }
-    this.logger?.trace(`SampleSet.addValues: resulting dictionary: ${this.dictionary}`);
+
+    this.logger?.trace(`SampleSet.addValues: new numSamples: ${this.values.length}`);
 
     this.recalculate = true;
   }
 
   public addValue(value: SampleSetValue) {
-    if (this.valuesNumeric === false && typeof value === 'string') {
+    if ( this.values.length > 0 &&
+        ( typeof value === 'string' && this.valuesNumeric ) ||
+        ( typeof value === 'number' && !this.valuesNumeric ) ) {
+      // type mismatch on values being added - quietly IGNORE
+      this.logger?.error(`SampleSet.addValue: type mismatch on value added, valuesNumeric: ${this.valuesNumeric}, values type: ${typeof value}`);
+      return;
+    }
+
+    if (typeof value === 'string') {
       const existingItemIndex = this.dictionary.findIndex((dictItem) => dictItem === value);
       if (existingItemIndex > 0) {
         // item found in dictionary
@@ -150,10 +169,8 @@ export class SampleSet {
         this.dictionary.push(value);
         this.values.push(this.dictionary.length-1);
       }
-    } else if (this.valuesNumeric === true && typeof value === 'number') {
-      this.values.push(value);
     } else {
-      this.logger?.error(`SampleSet.addvalue: typeof value provided (${typeof value}) does not match type of SampleSet values`);
+      this.values.push(value);
     }
 
     this.recalculate = true;
@@ -288,6 +305,11 @@ export class SampleSet {
 
       let currentMin: number = sortedValues[0];
       let currentMax: number = currentMin + bucketSize;
+      if (currentMax === this.max) {
+        // VERY unlikely - but just in case, add a very small amount so as not to have a
+        // bucket of one with only the max value at the end.
+        currentMax += 1e-10;
+      }
       let count: number = 0;
 
       for (let i=0; i<sortedValues.length; i++) {
@@ -297,6 +319,11 @@ export class SampleSet {
           this.distribution.push(new SampleBucket(currentMin, currentMax, count));
           currentMin += bucketSize;
           currentMax = currentMin+bucketSize;
+          if (currentMax === this.max) {
+            // VERY unlikely - but just in case, add a very small amount so as not to have a
+            // bucket of one with only the max value at the end.
+            currentMax += 1e-10;
+          }
           count = 1;
         }
 
@@ -333,10 +360,15 @@ export class SampleSet {
 
     // calculate the mode
     const maxDistributionBucketIndex = this.distribution.reduce(
-      (curMax, bucket, index) => bucket.count > this.distribution[curMax].count ? index : curMax,
+      (curMaxIndex, bucket, index) => bucket.count > this.distribution[curMaxIndex].count ? index : curMaxIndex,
       0,
     );
-    this.mode = this.distribution[maxDistributionBucketIndex].min;
+    if ( this.valuesNumeric ) {
+      this.mode = this.distribution[maxDistributionBucketIndex].min +
+        (this.distribution[maxDistributionBucketIndex].max - this.distribution[maxDistributionBucketIndex].min)/2;
+    } else {
+      this.mode = this.distribution[maxDistributionBucketIndex].min;
+    }
 
     this.logger?.trace(`SampleSet.calcFromSortedValues: mode: ${this.mode}`);
 
