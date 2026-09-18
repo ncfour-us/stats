@@ -18,7 +18,7 @@ const project = new TypeScriptESMProject({
   packageManager: javascript.NodePackageManager.PNPM,
   projenrcTs: true,
 
-  // repository: 'https://github.com/ncfour-us/stats.git',
+  repository: 'https://github.com/ncfour-us/stats.git',
 
   packageName: '@ncfour-us/stats',
 
@@ -29,9 +29,7 @@ const project = new TypeScriptESMProject({
 
   devDeps: ['@ncfour-us/projen-utils', 'typescript@^6', '@jest/globals'],
   deps: ['@ncfour-us/logging'],
-  // localPackageArchiveDir: ~/.local-build-packages,                        /* Location for local archive of released artifacts. */
-  // packageName: undefined,                                                 /* The "name" in package.json. */
-  // repoBuildPackageModel: RepoBuildPackageModel.LOCAL_DEV_BUILD_REGISTRY,  /* Type of repository, packaging, and release model to use. */
+
   eslintFlatConfig: true,
   prettierFlatConfig: true,
   precommitConfig: true,
@@ -40,8 +38,8 @@ const project = new TypeScriptESMProject({
   repoBuildPackageModel: RepoBuildPackageModel.LOCAL_BUILD_PACKAGE,
   localPackageArchiveDir: '~/.tjh-packages',
   releaseToLocal: true,
-  // releaseToNpm: true,
-  // releaseToGithub: true,
+  releaseToNpm: true,
+  releaseToGithub: true,
   buildTagTask: true,
 
   docsIndex: true,

@@ -1,6 +1,10 @@
 {
   "name": "@ncfour-us/stats",
   "description": "A set of basic statistics classes and utility functions",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ncfour-us/stats.git"
+  },
   "scripts": {
     "build": "projen build",
     "build:tag": "projen build:tag",
@@ -18,7 +22,9 @@
     "post-upgrade": "projen post-upgrade",
     "pre-compile": "projen pre-compile",
     "publish:git": "projen publish:git",
+    "publish:github": "projen publish:github",
     "publish:local": "projen publish:local",
+    "publish:npm": "projen publish:npm",
     "release": "projen release",
     "test": "projen test",
     "test:watch": "projen test:watch",

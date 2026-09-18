@@ -325,9 +325,28 @@
         },
         {
           "builtin": "release/tag-version"
+        },
+        {
+          "execArgs": [
+            "git",
+            "push",
+            "--follow-tags",
+            "origin",
+            "main"
+          ]
         }
       ],
       "condition": "git log --oneline -1 | grep -v \"chore(release):\" > /dev/null && sh -c \"test \\\"$(git branch --show-current)\\\" = \\\"main\\\"\""
+    },
+    "publish:github": {
+      "name": "publish:github",
+      "description": "Publish this package to GitHub Releases",
+      "steps": [
+        {
+          "exec": "gh release create $(cat dist/releasetag.txt) --notes-file dist/changelog.md --title $(cat dist/releasetag.txt) --verify-tag"
+        }
+      ],
+      "condition": "sh -c \"test -f \\\"dist/version.txt\\\" && test \\\"$(git branch --show-current)\\\" = \\\"main\\\"\""
     },
     "publish:local": {
       "name": "publish:local",
@@ -335,6 +354,20 @@
         {
           "name": "copy package to ~/.tjh-packages folder (dryrun: false)",
           "exec": "cp dist/js/ncfour-us-stats-$(cat dist/version.txt).tgz ~/.tjh-packages/."
+        }
+      ],
+      "condition": "sh -c \"test -f \\\"dist/version.txt\\\" && test \\\"$(git branch --show-current)\\\" = \\\"main\\\"\""
+    },
+    "publish:npm": {
+      "name": "publish:npm",
+      "description": "Publish this package to npm",
+      "env": {
+        "NPM_DIST_TAG": "latest",
+        "NPM_REGISTRY": "registry.npmjs.org"
+      },
+      "steps": [
+        {
+          "exec": "npm publish dist/js/ncfour-us-stats-$(cat dist/version.txt).tgz"
         }
       ],
       "condition": "sh -c \"test -f \\\"dist/version.txt\\\" && test \\\"$(git branch --show-current)\\\" = \\\"main\\\"\""
@@ -370,6 +403,12 @@
         },
         {
           "spawn": "publish:local"
+        },
+        {
+          "spawn": "publish:npm"
+        },
+        {
+          "spawn": "publish:github"
         }
       ]
     },
