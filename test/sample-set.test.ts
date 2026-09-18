@@ -2,7 +2,8 @@
 
 import { describe, test, expect } from '@jest/globals';
 import { Logger } from '@ncfour-us/logging';
-import { SampleBucket, SampleSet } from '@ncfour-us/stats';
+import { SampleSetPercentiles } from '../src/index.js';
+import { SampleBucket, SampleSet, SampleSetValue } from '@ncfour-us/stats';
 
 const logger = Logger.createLogger('simple', {
   level: 'error',
@@ -191,6 +192,53 @@ describe('SampleSet tests', () => {
 
     // Then - Assert
     expect(mode).toBeCloseTo(-0.833333);
+  });
+
+  test('min of small numeric set works', () => {
+    // Given - Arrange
+    const newSampleSet = new SampleSet({
+      initialValues: [0, 2.3, -3.4, -1, 6, 12],
+      logger: logger,
+    });
+
+    // When - Act
+    const min = newSampleSet.getMin();
+
+    // Then - Assert
+    expect(min).toBeCloseTo(-3.4);
+  });
+
+  test('max of small numeric set works', () => {
+    // Given - Arrange
+    const newSampleSet = new SampleSet({
+      initialValues: [0, 2.3, -3.4, -1, 6, 12],
+      logger: logger,
+    });
+
+    // When - Act
+    const max = newSampleSet.getMax();
+
+    // Then - Assert
+    expect(max).toBeCloseTo(12);
+  });
+
+  test('percentiles of small numeric set works', () => {
+    // Given - Arrange
+    const newSampleSet = new SampleSet({
+      initialValues: [0, 2.3, -3.4, -1, 6, 12],
+      logger: logger,
+    });
+
+    // When - Act
+    const percentiles: SampleSetPercentiles = newSampleSet.getPercentiles();
+    const median: SampleSetValue = newSampleSet.getMedian();
+
+    // Then - Assert
+    expect(percentiles['0']).toBeCloseTo(-3.4);
+    expect(percentiles['25']).toBeCloseTo(-1);
+    expect(percentiles['50']).toBeCloseTo(median as number);
+    expect(percentiles['75']).toBeCloseTo(2.3);
+    expect(percentiles['100']).toBeCloseTo(12);
   });
 
   test('add of string to small numeric set is IGNORED', () => {

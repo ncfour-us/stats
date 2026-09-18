@@ -2,6 +2,9 @@
 
 # Class: SampleBucket
 
+SampleBucket is used to represent the calculated
+distribution for the SampleSet.
+
 ## Constructors
 
 ### Constructor
@@ -37,6 +40,12 @@
 ### max
 
 > **max**: `number`
+
+***
+
+### midPoint
+
+> **midPoint**: `number`
 
 ***
 

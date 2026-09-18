@@ -3,17 +3,44 @@
 import { ILogger } from '@ncfour-us/logging';
 import { SampleSet } from './sample-set.js';
 
+/**
+ * The options for instantiating a Uniform distribution SampleSet.
+ */
 export interface UniformSampleSetOptions {
+
+  /**
+   * number of smaples to generate, default 1000
+   */
   numSamples?: number;
+
+  /**
+   * optional minimum value, default 0
+   */
   min?: number;
+
+  /**
+   * optional maximum value, default 1
+   */
   max?: number;
 
   // dependencies
+  /**
+   * optional logger to use.
+   */
   logger?: ILogger;
 };
 
+/**
+ * Class to create a Uniform distribution SampleSet
+ * with values in the range [0,1).
+ */
 export class UniformSampleSet extends SampleSet {
 
+  /**
+   * Create a new UniformSampleSet instance.
+   *
+   * @param options See {@link UniformSampleSetOptions}
+   */
   constructor(options: UniformSampleSetOptions) {
 
     super({

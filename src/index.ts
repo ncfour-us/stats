@@ -1,8 +1,9 @@
 // Copyright (c) 2026 Tim Hahn
 
-import { SampleBucket, SampleSet, SampleSetValue, SampleSetOptions } from './components/sample-set.js';
+import { NormalSampleSet, NormalSampleSetOptions } from './components/normal-sample-set.js';
+import { SampleBucket, SampleSet, SampleSetValue, SampleSetPercentiles, SampleSetOptions } from './components/sample-set.js';
 import { UniformSampleSet, UniformSampleSetOptions } from './components/uniform-sample-set.js';
 
-export type { SampleSetValue };
+export type { SampleSetValue, SampleSetOptions, SampleSetPercentiles, UniformSampleSetOptions, NormalSampleSetOptions };
 
-export { SampleBucket, SampleSet, SampleSetOptions, UniformSampleSet, UniformSampleSetOptions };
+export { SampleBucket, SampleSet, UniformSampleSet, NormalSampleSet };

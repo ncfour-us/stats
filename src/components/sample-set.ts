@@ -2,27 +2,67 @@
 
 import { ILogger } from '@ncfour-us/logging';
 
+/**
+ * SampleBucket is used to represent the calculated
+ * distribution for the SampleSet.
+ */
 export class SampleBucket {
   public min: number;
   public max: number;
+  public midPoint: number;
   public count: number;
 
   constructor(min: number, max: number, count: number) {
     this.min = min;
     this.max = max;
+    this.midPoint = this.min + (this.max-this.min)/2;
     this.count = count;
   }
 }
 
+/**
+ * The type of values stored in the SampleSet
+ */
 export type SampleSetValue = number | string;
 
+/**
+ * SampleSetPercentiles represents the calculated percentiles
+ * for the values in the SampleSet.
+ */
+export interface SampleSetPercentiles {
+  0: SampleSetValue;
+  25: SampleSetValue;
+  50: SampleSetValue;
+  75: SampleSetValue;
+  100: SampleSetValue;
+}
+
+/**
+ * The options for instantiating the SampleSet.
+ */
 export interface SampleSetOptions {
+
+  /**
+   * optional initial set of values to put into the SampleSet
+   */
   initialValues?: SampleSetValue[];
 
   // dependencies
+  /**
+   * optional logger to use.
+   */
   logger?: ILogger;
 };
 
+/**
+ * Base class to represent samples of a random variable
+ * in the stats package.
+ *
+ * Other calculated distributions are based on this base
+ * class.  However, instances of the base class can be
+ * created as well, if a set of random values exists to
+ * initialize the SampleSet.
+ */
 export class SampleSet {
   // dependencies
   protected logger?: ILogger;
@@ -41,8 +81,15 @@ export class SampleSet {
   private stddev: number;
   private max: number;
   private min: number;
+  private percentile25: number;
+  private percentile75: number;
   private distribution: SampleBucket[];
 
+  /**
+   * Create a new SampleSet instance.
+   *
+   * @param options See {@link SampleSetOptions}
+   */
   constructor(options: SampleSetOptions) {
     // dependencies
     this.logger = options.logger;
@@ -56,6 +103,8 @@ export class SampleSet {
     this.stddev = 0;
     this.min = 0;
     this.max = 0;
+    this.percentile25 = 0;
+    this.percentile75 = 0;
     this.distribution = [];
 
     // initialize values
@@ -70,6 +119,11 @@ export class SampleSet {
 
   }
 
+  /**
+   * get the array of values held in the SampleSet.
+   *
+   * @returns SampleSetValue[] - array of SampleSetValue
+   */
   public getValues(): SampleSetValue[] {
     let retVals: SampleSetValue[];
     if (this.valuesNumeric) {
@@ -81,6 +135,11 @@ export class SampleSet {
     return retVals;
   }
 
+  /**
+   * get a specific value, by index, held in the SampleSet.
+   *
+   * @returns SampleSetValue
+   */
   public getValue(index: number): SampleSetValue | undefined {
     let retVal: SampleSetValue;
 
@@ -97,7 +156,10 @@ export class SampleSet {
     return retVal;
   }
 
-  public setValues(values: SampleSetValue[]) {
+  /**
+   * Replace the set of values held in the SampleSet
+   */
+  public setValues(values: SampleSetValue[]): void {
     this.values = [] as number[];
     this.dictionary = [] as string[];
 
@@ -114,7 +176,12 @@ export class SampleSet {
     this.recalculate = true;
   }
 
-  public addValues(values: SampleSetValue[] ) {
+  /**
+   * Add values to the SampleSet
+   *
+   * @param values values to add to the SampleSet
+   */
+  public addValues(values: SampleSetValue[] ): void {
     if ( this.values.length > 0 &&
         ( typeof values[0] === 'string' && this.valuesNumeric ) ||
         ( typeof values[0] === 'number' && !this.valuesNumeric ) ) {
@@ -150,6 +217,11 @@ export class SampleSet {
     this.recalculate = true;
   }
 
+  /**
+   * Add a single value to the SampleSet
+   *
+   * @param value value to add to the SampleSet
+   */
   public addValue(value: SampleSetValue) {
     if ( this.values.length > 0 &&
         ( typeof value === 'string' && this.valuesNumeric ) ||
@@ -176,6 +248,12 @@ export class SampleSet {
     this.recalculate = true;
   }
 
+  /**
+   * Get the mean value of the SampleSet.  For string
+   * values, this is ordered by string sorting rules.
+   *
+   * @returns SampleSetValue - mean value of the SampleSet
+   */
   public getMean(): SampleSetValue {
     if (this.recalculate) {
       this.recalculateStats();
@@ -183,6 +261,12 @@ export class SampleSet {
     return this.valuesNumeric ? this.mean : this.dictionary[this.mean];
   }
 
+  /**
+   * Get the median value of the SampleSet.  For string
+   * values, this is ordered by string sorting rules.
+   *
+   * @returns SampleSetValue - median value of the SampleSet
+   */
   public getMedian(): SampleSetValue {
     if (this.recalculate) {
       this.recalculateStats();
@@ -190,6 +274,12 @@ export class SampleSet {
     return this.valuesNumeric ? this.median : this.dictionary[this.median];
   }
 
+  /**
+   * Get the mode value of the SampleSet.  For string
+   * values, this is ordered by string sorting rules.
+   *
+   * @returns SampleSetValue - mode value of the SampleSet
+   */
   public getMode(): SampleSetValue {
     if (this.recalculate) {
       this.recalculateStats();
@@ -197,6 +287,12 @@ export class SampleSet {
     return this.valuesNumeric ? this.mode : this.dictionary[this.mode];
   }
 
+  /**
+   * Get the minimum value of the SampleSet.  For string
+   * values, this is ordered by string sorting rules.
+   *
+   * @returns SampleSetValue - minimum value of the SampleSet
+   */
   public getMin(): SampleSetValue {
     if (this.recalculate) {
       this.recalculateStats();
@@ -204,6 +300,12 @@ export class SampleSet {
     return this.valuesNumeric ? this.min : this.dictionary[this.min];
   }
 
+  /**
+   * Get the maximum value of the SampleSet.  For string
+   * values, this is ordered by string sorting rules.
+   *
+   * @returns SampleSetValue - maximum value of the SampleSet
+   */
   public getMax(): SampleSetValue {
     if (this.recalculate) {
       this.recalculateStats();
@@ -211,13 +313,44 @@ export class SampleSet {
     return this.valuesNumeric ? this.max : this.dictionary[this.max];
   }
 
-  public getVariance(): SampleSetValue {
+  /**
+   * Get the variance value of the SampleSet.  For string
+   * values, this is the variance across the size of the SampleSet [0,sampleSet.getNumSamples()-1].
+   *
+   * @returns number - Calculated variance of the SampleSet
+   */
+  public getVariance(): number {
     if (this.recalculate) {
       this.recalculateStats();
     }
     return this.variance;
   }
 
+  /**
+   * Get the percentiles values for the SampleSet.
+   *
+   * @returns sampleSetPercentiles - the 0, 25, 50, 75, and 100th percential values for the SampleSet.
+   */
+  public getPercentiles(): SampleSetPercentiles {
+    if (this.recalculate) {
+      this.recalculateStats();
+    }
+    return {
+      0: this.valuesNumeric ? this.min : this.dictionary[this.min],
+      25: this.valuesNumeric ? this.percentile25 : this.dictionary[this.percentile25],
+      50: this.valuesNumeric ? this.median : this.dictionary[this.median],
+      75: this.valuesNumeric ? this.percentile75 : this.dictionary[this.percentile75],
+      100: this.valuesNumeric ? this.max : this.dictionary[this.max],
+    };
+  }
+
+  /**
+   * Get the standard deviation value of the SampleSet.  For string
+   * values, this is the standard deviation across the size of the
+   * SampleSet [0,sampleSet.getNumSamples()-1].
+   *
+   * @returns number - Calculated standard deviation of the SampleSet
+   */
   public getStddev(): number {
     if (this.recalculate) {
       this.recalculateStats();
@@ -225,10 +358,20 @@ export class SampleSet {
     return this.stddev;
   }
 
+  /**
+   * Get the type of values in the SampleSet
+   *
+   * @returns true if numeric values, false if string values
+   */
   public isNumeric(): boolean {
     return this.valuesNumeric;
   }
 
+  /**
+   * Get the number of values in the SampleSet
+   *
+   * @returns number of samples in the SampleSet
+   */
   public getNumSamples(): number {
     return this.values.length;
   }
@@ -292,6 +435,12 @@ export class SampleSet {
     // get the min and max values
     this.min = sortedValues[0];
     this.max = sortedValues[sortedValues.length-1];
+
+    // get the percentile25 and percentile50 values
+    let percentileIndex = Math.trunc((this.values.length-1)/4);
+    this.percentile25 = sortedValues[percentileIndex];
+    percentileIndex = Math.trunc((this.values.length-1)*(3/4));
+    this.percentile75 = sortedValues[percentileIndex];
 
     // create the distribution histogram/table
     this.distribution = [];

@@ -1,45 +1,48 @@
-[@ncfour-us/stats](../index.md) / SampleSet
+[@ncfour-us/stats](../index.md) / NormalSampleSet
 
-# Class: SampleSet
+# Class: NormalSampleSet
 
-Base class to represent samples of a random variable
-in the stats package.
+Class to create a Normal distribution SampleSet
+with values in the range (-infinity,infinity),
+with default mean 0 and default standard deviation 1.
 
-Other calculated distributions are based on this base
-class.  However, instances of the base class can be
-created as well, if a set of random values exists to
-initialize the SampleSet.
+## Extends
 
-## Extended by
-
-- [`UniformSampleSet`](UniformSampleSet.md)
-- [`NormalSampleSet`](NormalSampleSet.md)
+- [`SampleSet`](SampleSet.md)
 
 ## Constructors
 
 ### Constructor
 
-> **new SampleSet**(`options`): `SampleSet`
+> **new NormalSampleSet**(`options`): `NormalSampleSet`
 
-Create a new SampleSet instance.
+Create a new NormalSampleSet instance.
 
 #### Parameters
 
 ##### options
 
-[`SampleSetOptions`](../interfaces/SampleSetOptions.md)
+[`NormalSampleSetOptions`](../interfaces/NormalSampleSetOptions.md)
 
-See [SampleSetOptions](../interfaces/SampleSetOptions.md)
+See [NormalSampleSetOptions](../interfaces/NormalSampleSetOptions.md)
 
 #### Returns
 
-`SampleSet`
+`NormalSampleSet`
+
+#### Overrides
+
+[`SampleSet`](SampleSet.md).[`constructor`](SampleSet.md#constructor)
 
 ## Properties
 
 ### logger?
 
 > `protected` `optional` **logger?**: `ILogger`
+
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`logger`](SampleSet.md#logger)
 
 ## Methods
 
@@ -61,6 +64,10 @@ value to add to the SampleSet
 
 `void`
 
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`addValue`](SampleSet.md#addvalue)
+
 ***
 
 ### addValues()
@@ -81,6 +88,10 @@ values to add to the SampleSet
 
 `void`
 
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`addValues`](SampleSet.md#addvalues)
+
 ***
 
 ### getMax()
@@ -95,6 +106,10 @@ values, this is ordered by string sorting rules.
 [`SampleSetValue`](../type-aliases/SampleSetValue.md)
 
 SampleSetValue - maximum value of the SampleSet
+
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getMax`](SampleSet.md#getmax)
 
 ***
 
@@ -111,6 +126,10 @@ values, this is ordered by string sorting rules.
 
 SampleSetValue - mean value of the SampleSet
 
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getMean`](SampleSet.md#getmean)
+
 ***
 
 ### getMedian()
@@ -125,6 +144,10 @@ values, this is ordered by string sorting rules.
 [`SampleSetValue`](../type-aliases/SampleSetValue.md)
 
 SampleSetValue - median value of the SampleSet
+
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getMedian`](SampleSet.md#getmedian)
 
 ***
 
@@ -141,6 +164,10 @@ values, this is ordered by string sorting rules.
 
 SampleSetValue - minimum value of the SampleSet
 
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getMin`](SampleSet.md#getmin)
+
 ***
 
 ### getMode()
@@ -156,6 +183,10 @@ values, this is ordered by string sorting rules.
 
 SampleSetValue - mode value of the SampleSet
 
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getMode`](SampleSet.md#getmode)
+
 ***
 
 ### getNumSamples()
@@ -170,6 +201,10 @@ Get the number of values in the SampleSet
 
 number of samples in the SampleSet
 
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getNumSamples`](SampleSet.md#getnumsamples)
+
 ***
 
 ### getPercentiles()
@@ -183,6 +218,10 @@ Get the percentiles values for the SampleSet.
 [`SampleSetPercentiles`](../interfaces/SampleSetPercentiles.md)
 
 sampleSetPercentiles - the 0, 25, 50, 75, and 100th percential values for the SampleSet.
+
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getPercentiles`](SampleSet.md#getpercentiles)
 
 ***
 
@@ -199,6 +238,10 @@ SampleSet [0,sampleSet.getNumSamples()-1].
 `number`
 
 number - Calculated standard deviation of the SampleSet
+
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getStddev`](SampleSet.md#getstddev)
 
 ***
 
@@ -220,6 +263,10 @@ get a specific value, by index, held in the SampleSet.
 
 SampleSetValue
 
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getValue`](SampleSet.md#getvalue)
+
 ***
 
 ### getValues()
@@ -233,6 +280,10 @@ get the array of values held in the SampleSet.
 [`SampleSetValue`](../type-aliases/SampleSetValue.md)[]
 
 SampleSetValue[] - array of SampleSetValue
+
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getValues`](SampleSet.md#getvalues)
 
 ***
 
@@ -249,6 +300,10 @@ values, this is the variance across the size of the SampleSet [0,sampleSet.getNu
 
 number - Calculated variance of the SampleSet
 
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`getVariance`](SampleSet.md#getvariance)
+
 ***
 
 ### isNumeric()
@@ -262,6 +317,10 @@ Get the type of values in the SampleSet
 `boolean`
 
 true if numeric values, false if string values
+
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`isNumeric`](SampleSet.md#isnumeric)
 
 ***
 
@@ -280,3 +339,7 @@ Replace the set of values held in the SampleSet
 #### Returns
 
 `void`
+
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`setValues`](SampleSet.md#setvalues)
