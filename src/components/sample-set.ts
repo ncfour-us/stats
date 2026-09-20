@@ -359,6 +359,18 @@ export class SampleSet {
   }
 
   /**
+   * Get the calculated distribution buckets for the SampleSet.
+   *
+   * @returns distribution - Array of SampleBuckets representing the distribution of the SampleSet
+   */
+  public getDistribution(): SampleBucket[] {
+    if (this.recalculate) {
+      this.recalculateStats();
+    }
+    return this.distribution;
+  }
+
+  /**
    * Get the type of values in the SampleSet
    *
    * @returns true if numeric values, false if string values

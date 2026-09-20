@@ -83,6 +83,20 @@ values to add to the SampleSet
 
 ***
 
+### getDistribution()
+
+> **getDistribution**(): [`SampleBucket`](SampleBucket.md)[]
+
+Get the calculated distribution buckets for the SampleSet.
+
+#### Returns
+
+[`SampleBucket`](SampleBucket.md)[]
+
+distribution - Array of SampleBuckets representing the distribution of the SampleSet
+
+***
+
 ### getMax()
 
 > **getMax**(): [`SampleSetValue`](../type-aliases/SampleSetValue.md)

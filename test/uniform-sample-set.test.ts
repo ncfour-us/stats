@@ -2,7 +2,7 @@
 
 import { describe, test, expect } from '@jest/globals';
 import { Logger } from '@ncfour-us/logging';
-import { UniformSampleSet } from '@ncfour-us/stats';
+import { UniformSampleSet, SampleBucket } from '@ncfour-us/stats';
 
 const logger = Logger.createLogger('simple', {
   level: 'trace',
@@ -55,5 +55,19 @@ describe('UniformSampleSet tests', () => {
     // Then - Assert
     expect(numSamples).toBe(1000);
     expect(mean).toBeCloseTo(0, 1);
+  });
+
+  test('distribution for 1000 samples has size 32 or more', () => {
+    // Given - Arrange
+
+    // When - Act
+    const newSampleSet = new UniformSampleSet({
+      numSamples: 1000,
+      logger: logger,
+    });
+    const distribution: SampleBucket[] = newSampleSet.getDistribution();
+
+    // Then - Assert
+    expect(distribution.length).toBeGreaterThanOrEqual(32);
   });
 });
