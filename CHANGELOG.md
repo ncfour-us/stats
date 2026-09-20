@@ -1,4 +1,11 @@
 
+## [0.0.2](https://github.com/ncfour-us/stats/compare/v0.0.1...v0.0.2) (2026-09-20)
+
+
+### Features
+
+* implement SampleSet.getDistribution() method ([aeb355e](https://github.com/ncfour-us/stats/commit/aeb355e51faa371ca6af717eb68f9e4c2ce1b997))
+
 ## [0.0.1](https://github.com/ncfour-us/stats/compare/v0.0.0...v0.0.1) (2026-09-18)
 
 
