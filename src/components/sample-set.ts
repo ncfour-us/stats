@@ -15,7 +15,7 @@ export class SampleBucket {
   constructor(min: number, max: number, count: number) {
     this.min = min;
     this.max = max;
-    this.midPoint = this.min + (this.max-this.min)/2;
+    this.midPoint = this.min + (this.max - this.min) / 2;
     this.count = count;
   }
 }
@@ -41,7 +41,6 @@ export interface SampleSetPercentiles {
  * The options for instantiating the SampleSet.
  */
 export interface SampleSetOptions {
-
   /**
    * optional initial set of values to put into the SampleSet
    */
@@ -52,7 +51,7 @@ export interface SampleSetOptions {
    * optional logger to use.
    */
   logger?: ILogger;
-};
+}
 
 /**
  * Base class to represent samples of a random variable
@@ -109,14 +108,23 @@ export class SampleSet {
 
     // initialize values
     this.valuesNumeric = true;
-    this.values = ([] as number[]);
-    this.dictionary = ([] as string[]);
+    this.values = [] as number[];
+    this.dictionary = [] as string[];
     if (options.initialValues) {
       this.setValues(options.initialValues);
     }
 
     this.logger?.trace(`SampleSet.constructor: numSamples: ${this.values.length}`);
+  }
 
+  /**
+   * produce a serializable JSON object which can be used to
+   * re-create the SampleSet
+   *
+   * @returns SampleSetValue[] - array of SampleSetValue
+   */
+  public toJSON() {
+    return this.getValues();
   }
 
   /**
@@ -181,12 +189,15 @@ export class SampleSet {
    *
    * @param values values to add to the SampleSet
    */
-  public addValues(values: SampleSetValue[] ): void {
-    if ( this.values.length > 0 &&
-        ( typeof values[0] === 'string' && this.valuesNumeric ) ||
-        ( typeof values[0] === 'number' && !this.valuesNumeric ) ) {
+  public addValues(values: SampleSetValue[]): void {
+    if (
+      (this.values.length > 0 && typeof values[0] === 'string' && this.valuesNumeric) ||
+      (typeof values[0] === 'number' && !this.valuesNumeric)
+    ) {
       // type mismatch on values being added - quietly IGNORE
-      this.logger?.error(`SampleSet.addValues: type mismatch on values added, valuesNumeric: ${this.valuesNumeric}, values type: ${typeof values[0]}`);
+      this.logger?.error(
+        `SampleSet.addValues: type mismatch on values added, valuesNumeric: ${this.valuesNumeric}, values type: ${typeof values[0]}`,
+      );
       return;
     }
 
@@ -201,7 +212,7 @@ export class SampleSet {
         } else {
           // add to dictionary
           this.dictionary.push(value);
-          this.values.push(this.dictionary.length-1);
+          this.values.push(this.dictionary.length - 1);
         }
       });
 
@@ -223,11 +234,14 @@ export class SampleSet {
    * @param value value to add to the SampleSet
    */
   public addValue(value: SampleSetValue) {
-    if ( this.values.length > 0 &&
-        ( typeof value === 'string' && this.valuesNumeric ) ||
-        ( typeof value === 'number' && !this.valuesNumeric ) ) {
+    if (
+      (this.values.length > 0 && typeof value === 'string' && this.valuesNumeric) ||
+      (typeof value === 'number' && !this.valuesNumeric)
+    ) {
       // type mismatch on values being added - quietly IGNORE
-      this.logger?.error(`SampleSet.addValue: type mismatch on value added, valuesNumeric: ${this.valuesNumeric}, values type: ${typeof value}`);
+      this.logger?.error(
+        `SampleSet.addValue: type mismatch on value added, valuesNumeric: ${this.valuesNumeric}, values type: ${typeof value}`,
+      );
       return;
     }
 
@@ -239,7 +253,7 @@ export class SampleSet {
       } else {
         // add to dictionary
         this.dictionary.push(value);
-        this.values.push(this.dictionary.length-1);
+        this.values.push(this.dictionary.length - 1);
       }
     } else {
       this.values.push(value);
@@ -389,7 +403,6 @@ export class SampleSet {
   }
 
   private recalculateStats() {
-
     this.calcMean();
     this.calcVariance();
     this.calcFromSortedValues();
@@ -398,14 +411,16 @@ export class SampleSet {
   }
 
   private calcMean() {
-    this.mean = this.values.reduce((sum, value) => sum+value, 0) / this.values.length;
+    this.mean = this.values.reduce((sum, value) => sum + value, 0) / this.values.length;
     this.mean = this.valuesNumeric ? this.mean : Math.round(this.mean);
   }
 
   // Calculates the variance and standard deviation
   // NOTE - this function ASSUMES that the mean has already been recalculated
   private calcVariance() {
-    this.variance = this.values.reduce((sum, value) => sum+((value-this.mean)*(value-this.mean)), 0) / this.values.length;
+    this.variance =
+      this.values.reduce((sum, value) => sum + (value - this.mean) * (value - this.mean), 0) /
+      this.values.length;
     this.stddev = Math.sqrt(this.variance);
   }
 
@@ -414,55 +429,50 @@ export class SampleSet {
     // sort the values
     let sortedValues: number[];
 
-    if ( this.valuesNumeric ) {
+    if (this.valuesNumeric) {
       // the default sort function is appropriate
-      sortedValues = this.values.toSorted( (a, b) =>
-        a < b ?
-          -1 :
-          a > b ?
-            1 :
-            0,
-      );
+      sortedValues = this.values.toSorted((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 
       this.logger?.trace(`SampleSet.calcFromSortedValues: sortedValues: ${sortedValues}`);
     } else {
       // need to sort based on dictionary lookup
-      sortedValues = this.values.toSorted( (a, b) =>
-        this.dictionary[a] < this.dictionary[b] ?
-          -1 :
-          (this.dictionary[a] > this.dictionary[b] ?
-            1 :
-            0 ),
+      sortedValues = this.values.toSorted((a, b) =>
+        this.dictionary[a] < this.dictionary[b]
+          ? -1
+          : this.dictionary[a] > this.dictionary[b]
+            ? 1
+            : 0,
       );
 
-      this.logger?.trace(`SampleSet.calcFromSortedValues: sortedValues: ${sortedValues.map((value) => this.dictionary[value])}`);
+      this.logger?.trace(
+        `SampleSet.calcFromSortedValues: sortedValues: ${sortedValues.map((value) => this.dictionary[value])}`,
+      );
     }
 
-
     // get the median
-    const midPointIndex = Math.trunc((this.values.length-1)/2);
+    const midPointIndex = Math.trunc((this.values.length - 1) / 2);
     this.median = sortedValues[midPointIndex];
     this.logger?.trace(`SampleSet.calcFromSortedValues: midPointIndex: ${midPointIndex}`);
 
     // get the min and max values
     this.min = sortedValues[0];
-    this.max = sortedValues[sortedValues.length-1];
+    this.max = sortedValues[sortedValues.length - 1];
 
     // get the percentile25 and percentile50 values
-    let percentileIndex = Math.trunc((this.values.length-1)/4);
+    let percentileIndex = Math.trunc((this.values.length - 1) / 4);
     this.percentile25 = sortedValues[percentileIndex];
-    percentileIndex = Math.trunc((this.values.length-1)*(3/4));
+    percentileIndex = Math.trunc((this.values.length - 1) * (3 / 4));
     this.percentile75 = sortedValues[percentileIndex];
 
     // create the distribution histogram/table
     this.distribution = [];
-    if ( this.valuesNumeric ) {
+    if (this.valuesNumeric) {
       // in this case, create buckets of equal size which span the range [min, max)
       // and count the number of values in each range
 
       // Use the sqrt(numSamples) rule of thumb for calculating the number of buckets
-      const numBuckets: number = Math.trunc(Math.sqrt(this.values.length)+1);
-      const bucketSize: number = (this.max-this.min)/numBuckets;
+      const numBuckets: number = Math.trunc(Math.sqrt(this.values.length) + 1);
+      const bucketSize: number = (this.max - this.min) / numBuckets;
 
       let currentMin: number = sortedValues[0];
       let currentMax: number = currentMin + bucketSize;
@@ -473,13 +483,13 @@ export class SampleSet {
       }
       let count: number = 0;
 
-      for (let i=0; i<sortedValues.length; i++) {
+      for (let i = 0; i < sortedValues.length; i++) {
         if (sortedValues[i] >= currentMin && sortedValues[i] < currentMax) {
           count++;
         } else {
           this.distribution.push(new SampleBucket(currentMin, currentMax, count));
           currentMin += bucketSize;
-          currentMax = currentMin+bucketSize;
+          currentMax = currentMin + bucketSize;
           if (currentMax === this.max) {
             // VERY unlikely - but just in case, add a very small amount so as not to have a
             // bucket of one with only the max value at the end.
@@ -487,12 +497,13 @@ export class SampleSet {
           }
           count = 1;
         }
-
       }
       this.distribution.push(new SampleBucket(currentMin, currentMax, count));
 
       // numBuckets and distribution.length should match
-      this.logger?.trace(`SampleSet.calcFromSortedValues: numeric data, numBuckets: ${numBuckets}, distribution.length: ${this.distribution.length}`);
+      this.logger?.trace(
+        `SampleSet.calcFromSortedValues: numeric data, numBuckets: ${numBuckets}, distribution.length: ${this.distribution.length}`,
+      );
     } else {
       // in this case, the number of buckets matches the number of strings in the SampleSet
       // which is the size of the dictionary
@@ -500,7 +511,7 @@ export class SampleSet {
       let currentValue: number = sortedValues[0];
       let count: number = 0;
 
-      for (let i=0; i<sortedValues.length; i++) {
+      for (let i = 0; i < sortedValues.length; i++) {
         if (sortedValues[i] === currentValue) {
           count++;
         } else {
@@ -508,31 +519,36 @@ export class SampleSet {
           currentValue = sortedValues[i];
           count = 1;
         }
-
       }
       this.distribution.push(new SampleBucket(currentValue, currentValue, count));
 
       // dictionary.length and distribution.length should match
-      this.logger?.trace(`SampleSet.calcFromSortedValues: string data, dictionary.length: ${this.dictionary.length}, distribution.length: ${this.distribution.length}`);
+      this.logger?.trace(
+        `SampleSet.calcFromSortedValues: string data, dictionary.length: ${this.dictionary.length}, distribution.length: ${this.distribution.length}`,
+      );
       this.logger?.trace(`SampleSet.calcFromSortedValues: dictionary: ${this.dictionary}`);
     }
 
-    this.logger?.trace(`SampleSet.calcFromSortedValues: numeric: ${this.valuesNumeric}, distribution details: ${JSON.stringify(this.distribution, null, 2)}`);
+    this.logger?.trace(
+      `SampleSet.calcFromSortedValues: numeric: ${this.valuesNumeric}, distribution details: ${JSON.stringify(this.distribution, null, 2)}`,
+    );
 
     // calculate the mode
     const maxDistributionBucketIndex = this.distribution.reduce(
-      (curMaxIndex, bucket, index) => bucket.count > this.distribution[curMaxIndex].count ? index : curMaxIndex,
+      (curMaxIndex, bucket, index) =>
+        bucket.count > this.distribution[curMaxIndex].count ? index : curMaxIndex,
       0,
     );
-    if ( this.valuesNumeric ) {
-      this.mode = this.distribution[maxDistributionBucketIndex].min +
-        (this.distribution[maxDistributionBucketIndex].max - this.distribution[maxDistributionBucketIndex].min)/2;
+    if (this.valuesNumeric) {
+      this.mode =
+        this.distribution[maxDistributionBucketIndex].min +
+        (this.distribution[maxDistributionBucketIndex].max -
+          this.distribution[maxDistributionBucketIndex].min) /
+          2;
     } else {
       this.mode = this.distribution[maxDistributionBucketIndex].min;
     }
 
     this.logger?.trace(`SampleSet.calcFromSortedValues: mode: ${this.mode}`);
-
   }
-
 }

@@ -12,7 +12,6 @@ const logger = Logger.createLogger('simple', {
 });
 
 describe('SampleBucket tests', () => {
-
   test('instantiate with 0s works', () => {
     // Given - Arrange
 
@@ -36,11 +35,9 @@ describe('SampleBucket tests', () => {
     expect(newBucket.max).toBeCloseTo(12);
     expect(newBucket.count).toBe(3);
   });
-
 });
 
 describe('SampleSet tests', () => {
-
   test('instantiate empty works', () => {
     // Given - Arrange
 
@@ -269,5 +266,35 @@ describe('SampleSet tests', () => {
 
     // Then - Assert
     expect(numSamples).toBe(6);
+  });
+
+  test('toJSON() returns array of values (strings)', () => {
+    // Given - Arrange
+    const initialValues = ['blue', 'red', 'red', 'green', 'yellow', 'blue'];
+    const newSampleSet = new SampleSet({
+      initialValues: initialValues,
+      logger: logger,
+    });
+
+    // When - Act
+    const jsonValues = newSampleSet.toJSON();
+
+    // Then - Assert
+    expect(jsonValues).toEqual(initialValues);
+  });
+
+  test('toJSON() returns array of values (numbers)', () => {
+    // Given - Arrange
+    const initialValues = [0, 2.3, -3.4, -1, 6, 12];
+    const newSampleSet = new SampleSet({
+      initialValues: initialValues,
+      logger: logger,
+    });
+
+    // When - Act
+    const jsonValues = newSampleSet.toJSON();
+
+    // Then - Assert
+    expect(jsonValues).toEqual(initialValues);
   });
 });

@@ -361,3 +361,22 @@ Replace the set of values held in the SampleSet
 #### Inherited from
 
 [`SampleSet`](SampleSet.md).[`setValues`](SampleSet.md#setvalues)
+
+***
+
+### toJSON()
+
+> **toJSON**(): [`SampleSetValue`](../type-aliases/SampleSetValue.md)[]
+
+produce a serializable JSON object which can be used to
+re-create the SampleSet
+
+#### Returns
+
+[`SampleSetValue`](../type-aliases/SampleSetValue.md)[]
+
+SampleSetValue[] - array of SampleSetValue
+
+#### Inherited from
+
+[`SampleSet`](SampleSet.md).[`toJSON`](SampleSet.md#tojson)

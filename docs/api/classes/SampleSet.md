@@ -294,3 +294,18 @@ Replace the set of values held in the SampleSet
 #### Returns
 
 `void`
+
+***
+
+### toJSON()
+
+> **toJSON**(): [`SampleSetValue`](../type-aliases/SampleSetValue.md)[]
+
+produce a serializable JSON object which can be used to
+re-create the SampleSet
+
+#### Returns
+
+[`SampleSetValue`](../type-aliases/SampleSetValue.md)[]
+
+SampleSetValue[] - array of SampleSetValue
